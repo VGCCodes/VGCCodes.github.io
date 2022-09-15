@@ -27,6 +27,11 @@ let my = null;
 landing.addEventListener("mousedown", (event) => {
 	clicked = true;
 });
+
+landing.addEventListener("touchstart", (event) => {
+	clicked = true;
+});
+
 landing.addEventListener("mouseup", (event) => {
 	clicked = false;
 });
@@ -77,9 +82,9 @@ class RainDrop {
 
 		// Applying velocity
 		if (clicked) {
-			this.pos.x += this.vel.x / 5;
-			this.pos.y += this.vel.y / 5;
-			this.life += this.death_rate / 2;
+			this.pos.x -= this.vel.x;
+			this.pos.y -= this.vel.y;
+			//this.life += this.death_rate / 2;
 		} else {
 			this.pos.x += this.vel.x;
 			this.pos.y += this.vel.y;

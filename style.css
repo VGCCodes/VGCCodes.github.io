@@ -9,47 +9,9 @@ body {
   background-color: #415a77;
 }
 
-.logo {
-  font-weight: 900;
-  font-size: 2rem;
-}
-
 .bottom-separator {
   border-bottom: solid 2px #ffffff69;
   box-shadow: 0 10px 10px -10px #00000069;
-}
-
-.nav-container {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 5em;
-  background-color: #00000069;
-  box-shadow: 0 4px 10px #00000069;
-  color: #ffffff;
-  backdrop-filter: blur(10px);
-  z-index: 100;
-}
-
-.nav-links {
-  display: flex;
-  gap: 50px;
-  font-size: larger;
-}
-
-a,
-a:visited {
-  text-decoration: none;
-  color: #e0e1dd;
-  transition: color 0.05s;
-}
-
-a:hover {
-  color: #ffffff;
 }
 
 .landing {
@@ -75,10 +37,6 @@ a:hover {
   margin-bottom: -0.2em;
 }
 
-hr {
-  width: 100%;
-}
-
 .landing p {
   font-size: 1rem;
 }
@@ -92,37 +50,3 @@ hr {
   left: 0%;
   z-index: -1;
 }
-
-.lorem {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  /* align-items: center; */
-  padding: 10vw;
-  min-height: 100vh;
-  text-align: justify;
-  color: #ffffff;
-}
-
-.card-container {
-  display: flex;
-  flex-wrap: wrap;
-  /* align-items: center; */
-  justify-content: center;
-  gap: 40px;
-}
-
-.card {
-  width: 20em;
-  background: linear-gradient(to bottom, #0d1b2a69, #1b263b69);
-  box-shadow: 0 4px 10px #00000069;
-  padding: 3em;
-  border-radius: 5px;
-  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-}
-
-.card:focus,
-.card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 15px #00000069;
-  }
