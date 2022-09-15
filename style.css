@@ -1,52 +1,5 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Oswald";
-}
-
 body {
-  background-color: #415a77;
-}
-
-.bottom-separator {
-  border-bottom: solid 2px #ffffff69;
-  box-shadow: 0 10px 10px -10px #00000069;
-}
-
-.landing {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: justify;
-  width: 100%;
-  min-height: 100vh;
-  padding: 0 15vw;
+  margin: 0;
   overflow: hidden;
-  user-select: none;
-  cursor: pointer;
-  color: #ffffff;
-}
-
-.landing h1 {
-  font-weight: 700;
-  font-size: 7rem;
-  text-transform: uppercase;
-  margin-bottom: -0.2em;
-}
-
-.landing p {
-  font-size: 1rem;
-}
-
-#landing-canvas {
-  position: absolute;
-  /* border: 2px solid red; */
-  /* width: 100%; */
-  /* height: 100%; */
-  top: 0%;
-  left: 0%;
-  z-index: -1;
+  background: rgba(0, 0, 0, 1);
 }

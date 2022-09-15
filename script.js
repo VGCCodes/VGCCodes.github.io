@@ -1,165 +1,148 @@
-const landingCanvas = document.getElementById("landing-canvas");
-const landing = document.querySelector(".landing");
-landingCanvas.width = landing.clientWidth;
-landingCanvas.height = landing.clientHeight;
+// Variables
+const particleLimit = 500;
+const layerCount = particleLimit / 100 > 1 ? particleLimit / 100 : 1;
+const particleArray = Array.from({ length: layerCount }, () => []);
+const gravity = 9;
+const friction = 0.5;
+const canvases = [];
 
-const G = 0.1; // gravity
+// Debug Logs
 
-/** @type {CanvasRenderingContext2D} **/
-const c = landingCanvas.getContext("2d");
+console.log(`Particle Limit: ${particleLimit}`);
+console.log(`Canvas Count: ${layerCount}`);
+console.log(`Gravity: ${gravity}`);
+console.log(`Friction: ${friction}`);
+console.log(`Particles per canvas: ${particleLimit / layerCount}`);
 
-// linear gradient bg
-let bg = c.createLinearGradient(
-	landingCanvas.width / 2,
-	0,
-	landingCanvas.width / 2,
-	landingCanvas.height
-);
-bg.addColorStop(0, "#0D1B2A");
-bg.addColorStop(0.6, "#1B263B");
-bg.addColorStop(1, "#415A77");
+for (let i = 0; i < layerCount; i++) {
+	const canvas = document.createElement("canvas");
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	canvas.style.position = "absolute";
+	canvas.style.top = "0";
+	canvas.style.left = "0";
+	canvas.style.zIndex = i;
+	document.body.appendChild(canvas);
+	canvases.push(canvas);
+}
 
-let clicked = false;
-let mx = null;
-let my = null;
+// Auto-resize canvas when window size changes
 
-// Probably a bad way to do this
-landing.addEventListener("mousedown", (event) => {
-	clicked = true;
-});
-
-landing.addEventListener("mouseup", (event) => {
-	clicked = false;
-});
-
-landing.addEventListener("touchstart", (event) => {
-	clicked = true;
-});
-
-landing.addEventListener("touchend", (event) => {
-	clicked = false;
-});
-
-landing.addEventListener("mousemove", (event) => {
-	mx = event.clientX;
-	my = event.clientY;
-});
-
-landing.addEventListener("touchmove", (event) => {
-	mx = event.clientX;
-	my = event.clientY;
-});
-
-// making canvas resize seamless
-document.addEventListener("resize", () => {
-	landingCanvas.width = landing.clientWidth;
-	landingCanvas.height = landing.clientHeight;
-});
-
-// Raindrop class
-class RainDrop {
-	constructor(vel, pos) {
-		// Basic stuff
-		this.vel = vel;
-		this.pos = pos;
-		this.width = 5;
-		this.lifetime = 50;
-		this.life = this.lifetime;
-		this.dying = false;
-		this.death_rate = 1;
-		this.reversed = false;
+window.addEventListener("resize", () => {
+	for (let i = 0; i < canvases.length; i++) {
+		canvases[i].width = window.innerWidth;
+		canvases[i].height = window.innerHeight;
 	}
+});
 
-	update() {
-		if (this.dying) {
-			this.life -= this.death_rate;
-			if (this.width > 0) {
-				this.width -= this.death_rate;
-			}
-		}
-		if (this.pos.y > landingCanvas.height) {
-			// this._reset();
-			this.vel.y *= -0.2;
-			this.vel.x *= 0.1;
-			this.dying = true;
-		}
+// Helper Funcs
 
-		if (this.life <= 0) {
-			this._reset();
-		}
+const roundNumber = (rnum, rlength) =>
+	Math.round(rnum * Math.pow(10, rlength)) / Math.pow(10, rlength);
 
-		this.vel.y += G; // Applying gravity
+// Get mouse position
 
-		// Applying velocity
-		if (clicked) {
-			this.pos.x += this.vel.x / 5;
-			this.pos.y += this.vel.y / 5;
-			if (!this.reversed) {
-				setTimeout(() => {
-					this.pos.x -= this.vel.x / 2;
-					this.pos.y -= this.vel.y / 2;
-					this.life += this.death_rate / 2;
-				}, 1000);
-			}
+let mouse = {
+	x: null,
+	y: null,
+	radius: (canvases[0].height / 80) * (canvases[0].width / 80),
+};
+
+window.addEventListener("mousemove", (event) => {
+	mouse.x = event.x;
+	mouse.y = event.y;
+});
+
+// Create constructor function for individual particles
+
+function Particle(x, y, directionX, directionY, size, color, layer) {
+	this.x = x;
+	this.y = y;
+	this.directionX = directionX;
+	this.directionY = directionY;
+	this.size = size;
+	this.color = color;
+
+	// Method to draw individual particle
+	this.draw = function () {
+		const ctx = canvases[layer].getContext("2d");
+		ctx.beginPath();
+		ctx.moveTo(this.x, this.y);
+		ctx.lineTo(this.x + this.size, this.y - 10);
+		ctx.lineTo(this.x + this.size * 2, this.y);
+		ctx.arc(this.x + this.size, this.y, this.size, 0, Math.PI, false);
+		ctx.fillStyle = this.color;
+		ctx.fill();
+		ctx.stroke(); // Render the path
+		ctx.closePath();
+	};
+
+	// Method to make particles fall like rain
+	this.update = function () {
+		if (this.y > canvases[layer].height) {
+			this.y = 0 - this.size;
+			this.x = Math.floor(
+				Math.random() * (innerWidth - size * 2 - size * 2) + size * 2
+			);
+			this.directionX = 20;
+			this.directionY = Math.floor(Math.random() * 0.4 - 0.2);
 		} else {
-			this.pos.x += this.vel.x;
-			this.pos.y += this.vel.y;
+			this.directionY += gravity;
+		}
+
+		this.x += this.directionX;
+		this.y += this.directionY;
+
+		this.draw();
+	};
+}
+
+// Render particles
+
+function init() {
+	let currentLayer = 0;
+	// When a layer is full, move to the next layer
+	for (let i = 0; i < particleLimit; i++) {
+		if (particleArray[currentLayer].length >= particleLimit / layerCount) {
+			currentLayer++;
+		}
+
+		//Particle
+		let size = Math.floor(Math.random() * (8 - 2) + 2);
+		let x = Math.floor(
+			Math.random() * (innerWidth - size * 2 - size * 2) + size * 2
+		);
+		let y = Math.floor(
+			Math.random() * (innerHeight - size * 2 - size * 2) + size * 2
+		);
+		let directionX = 20;
+		let directionY = Math.floor(Math.random() * 0.4 - 0.2);
+		//random color
+		let color = `white`;
+
+		particleArray[currentLayer].push(
+			new Particle(x, y, directionX, directionY, size, color, currentLayer)
+		);
+	}
+}
+
+// Draw particles
+
+function draw() {
+	for (let i = 0; i < particleArray.length; i++) {
+		const ctx = canvases[i].getContext("2d");
+		ctx.clearRect(0, 0, innerWidth, innerHeight);
+		console.log(ctx.clearRect(0, 0, innerWidth, innerHeight));
+		for (let j = 0; j < particleArray[i].length; j++) {
+			particleArray[i][j].update();
 		}
 	}
-
-	// Making it seamless
-	_reset() {
-		this.pos.x =
-			Math.random() * 2 * landingCanvas.clientWidth - landingCanvas.clientWidth;
-		this.pos.y = Math.random() * -200;
-		this.width = 5;
-		let v = 10 + Math.random() * 50;
-		this.vel.x = v;
-		this.vel.y = v + Math.random();
-		this.life = this.lifetime;
-		this.dying = false;
-	}
-
-	// Drawing
-	draw() {
-		c.beginPath();
-		c.strokeStyle = "rgba(224, 225, 221, 0.2)";
-		c.lineWidth = this.width;
-		c.lineCap = "round";
-		c.moveTo(this.pos.x, this.pos.y);
-		c.lineTo(this.pos.x + this.vel.x, this.pos.y + this.vel.y);
-		c.stroke();
-		c.closePath();
-	}
 }
 
-// All the drops
-let drops = [];
-for (let i = 0; i <= 1000; i++) {
-	spawnRain(1000);
+function animate() {
+	requestAnimationFrame(animate);
+	draw();
 }
 
-function spawnRain(max_num) {
-	if (drops.length < max_num) {
-		let x =
-			Math.random() * 2 * landingCanvas.clientWidth - landingCanvas.clientWidth;
-		let y = Math.random() * -landingCanvas.clientHeight;
-		let v = 10 + Math.random() * 100;
-		drops.push(new RainDrop({ x: v, y: v }, { x: x, y: y })); // Creating new drops
-	}
-}
-
-// Main draw function
-function draw() {
-	c.fillStyle = bg;
-	c.fillRect(0, 0, landingCanvas.width, landingCanvas.height);
-
-	drops.forEach((drop) => {
-		drop.update();
-		drop.draw();
-	});
-
-	requestAnimationFrame(draw);
-}
-
-draw();
+init();
+animate();
