@@ -3,7 +3,7 @@ const landing = document.querySelector(".landing");
 landingCanvas.width = landing.clientWidth;
 landingCanvas.height = landing.clientHeight;
 
-const G = 9.8; // gravity
+const G = 0.1; // gravity
 
 /** @type {CanvasRenderingContext2D} **/
 const c = landingCanvas.getContext("2d");
