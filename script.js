@@ -3,7 +3,7 @@ const landing = document.querySelector(".landing");
 landingCanvas.width = landing.clientWidth;
 landingCanvas.height = landing.clientHeight;
 
-const G = 0.1; // gravity
+const G = 9.8; // gravity
 
 /** @type {CanvasRenderingContext2D} **/
 const c = landingCanvas.getContext("2d");
@@ -42,7 +42,7 @@ document.addEventListener("resize", () => {
 	landingCanvas.height = landing.clientHeight;
 });
 
-// Well, the main Raindrop class, nothing else ¯\_('-')_/¯
+// Raindrop class
 class RainDrop {
 	constructor(vel, pos) {
 		// Basic stuff
@@ -102,7 +102,6 @@ class RainDrop {
 	// Drawing
 	draw() {
 		c.beginPath();
-		// c.strokeStyle = "#778DA9";
 		c.strokeStyle = "rgba(224, 225, 221, 0.2)";
 		c.lineWidth = this.width;
 		c.lineCap = "round";
@@ -121,11 +120,10 @@ for (let i = 0; i <= 1000; i++) {
 
 function spawnRain(max_num) {
 	if (drops.length < max_num) {
-		console.log("Spawned");
 		let x =
 			Math.random() * 2 * landingCanvas.clientWidth - landingCanvas.clientWidth;
 		let y = Math.random() * -landingCanvas.clientHeight;
-		let v = 10 + Math.random() * 50;
+		let v = 10 + Math.random() * 100;
 		drops.push(new RainDrop({ x: v, y: v }, { x: x, y: y })); // Creating new drops
 	}
 }
@@ -141,7 +139,6 @@ function draw() {
 	});
 
 	requestAnimationFrame(draw);
-	// setTimeout(draw, 1000);
 }
 
 draw();
