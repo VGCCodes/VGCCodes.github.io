@@ -115,20 +115,57 @@ let render = function () {
 };
 
 let update = function (time) {
-	let dt = time - lastTime;
-	lastTime = time;
-	if (dt > 100) {
-		dt = FIXED_STEP;
-	}
-
-	while (dt >= FIXED_STEP) {
-		updateDrops(FIXED_STEP);
-		dt -= FIXED_STEP;
-	}
-
 	render();
 	requestAnimationFrame(update);
 };
 
 initDrops();
 requestAnimationFrame(update);
+
+const stop = false;
+const frameCount = 0;
+let fps, fpsInterval, startTime, now, then, elapsed;
+
+// initialize the timer variables and start the animation
+
+function startAnimating(fps) {
+	fpsInterval = 1000 / fps;
+	then = Date.now();
+	startTime = then;
+	animate();
+}
+
+function animate() {
+	// request another frame
+
+	requestAnimationFrame(animate);
+
+	// calc elapsed time since last loop
+
+	now = Date.now();
+	elapsed = now - then;
+
+	// if enough time has elapsed, draw the next frame
+
+	if (elapsed > fpsInterval) {
+		// Get ready for next frame by setting then=now, but also adjust for your
+		// specified fpsInterval not being a multiple of RAF's interval (16.7ms)
+		then = now - (elapsed % fpsInterval);
+
+		// Put your drawing code here
+		let dt = elapsed;
+		lastTime = now;
+		if (dt > 100) {
+			dt = FIXED_STEP;
+		}
+
+		while (dt >= FIXED_STEP) {
+			updateDrops(FIXED_STEP);
+			dt -= FIXED_STEP;
+		}
+	}
+}
+
+initDrops();
+render();
+startAnimating(60);
