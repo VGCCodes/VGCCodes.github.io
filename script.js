@@ -28,15 +28,24 @@ landing.addEventListener("mousedown", (event) => {
 	clicked = true;
 });
 
-landing.addEventListener("touchstart", (event) => {
-	clicked = true;
-});
-
 landing.addEventListener("mouseup", (event) => {
 	clicked = false;
 });
 
+landing.addEventListener("touchstart", (event) => {
+	clicked = true;
+});
+
+landing.addEventListener("touchend", (event) => {
+	clicked = false;
+});
+
 landing.addEventListener("mousemove", (event) => {
+	mx = event.clientX;
+	my = event.clientY;
+});
+
+landing.addEventListener("touchmove", (event) => {
 	mx = event.clientX;
 	my = event.clientY;
 });
@@ -58,6 +67,7 @@ class RainDrop {
 		this.life = this.lifetime;
 		this.dying = false;
 		this.death_rate = 1;
+		this.reversed = false;
 	}
 
 	update() {
@@ -82,9 +92,15 @@ class RainDrop {
 
 		// Applying velocity
 		if (clicked) {
-			this.pos.x -= this.vel.x;
-			this.pos.y -= this.vel.y;
-			//this.life += this.death_rate / 2;
+			this.pos.x += this.vel.x / 5;
+			this.pos.y += this.vel.y / 5;
+			if (!this.reversed) {
+				setTimeout(() => {
+					this.pos.x -= this.vel.x / 2;
+					this.pos.y -= this.vel.y / 2;
+					this.life += this.death_rate / 2;
+				}, 1000);
+			}
 		} else {
 			this.pos.x += this.vel.x;
 			this.pos.y += this.vel.y;
