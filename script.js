@@ -1,148 +1,134 @@
-// Variables
-const particleLimit = 500;
-const layerCount = particleLimit / 100 > 1 ? particleLimit / 100 : 1;
-const particleArray = Array.from({ length: layerCount }, () => []);
-const gravity = 9;
-const friction = 0.5;
-const canvases = [];
+const FIXED_STEP = 16;
 
-// Debug Logs
+// Wind
+const WIND_VELOCITY = 0.2; // Determines how slanted the rain drops fall, 0 = straight down
 
-console.log(`Particle Limit: ${particleLimit}`);
-console.log(`Canvas Count: ${layerCount}`);
-console.log(`Gravity: ${gravity}`);
-console.log(`Friction: ${friction}`);
-console.log(`Particles per canvas: ${particleLimit / layerCount}`);
+// Drop settings
+const DROP_COUNT = 500; // Adjust for more/less rain drops
+const DROP_WIDTH = 1; // Increase for thicker rain
+const DROP_X_BUFFER = 0; // How far to the sides of the screen drops will spawn
+const DROP_COLOR = "lightblue";
+const DROP_MIN_VELOCITY = 0.6;
+const DROP_MAX_VELOCITY = 0.9;
+const DROP_MIN_LENGTH = 20;
+const DROP_MAX_LENGTH = 40;
+const DROP_MIN_ALPHA = 0.3;
+const DROP_MAX_ALPHA = 1;
 
-for (let i = 0; i < layerCount; i++) {
-	const canvas = document.createElement("canvas");
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-	canvas.style.position = "absolute";
-	canvas.style.top = "0";
-	canvas.style.left = "0";
-	canvas.style.zIndex = i;
-	document.body.appendChild(canvas);
-	canvases.push(canvas);
-}
-
-// Auto-resize canvas when window size changes
-
-window.addEventListener("resize", () => {
-	for (let i = 0; i < canvases.length; i++) {
-		canvases[i].width = window.innerWidth;
-		canvases[i].height = window.innerHeight;
-	}
-});
-
-// Helper Funcs
-
-const roundNumber = (rnum, rlength) =>
-	Math.round(rnum * Math.pow(10, rlength)) / Math.pow(10, rlength);
-
-// Get mouse position
-
-let mouse = {
-	x: null,
-	y: null,
-	radius: (canvases[0].height / 80) * (canvases[0].width / 80),
+// Math helpers
+let math = {
+	// Random integer between min and max
+	randomInteger: function (min, max) {
+		return Math.round(Math.random() * (max - min) + min);
+	},
+	// Linear Interpolation
+	lerp: function (a, b, n) {
+		return a + (b - a) * n;
+	},
+	scaleVector: function (v, s) {
+		v.x *= s;
+		v.y *= s;
+	},
+	normalizeVector: function (v) {
+		let m = Math.sqrt(v.x * v.x + v.y * v.y);
+		math.scaleVector(v, 1 / m);
+	},
 };
 
-window.addEventListener("mousemove", (event) => {
-	mouse.x = event.x;
-	mouse.y = event.y;
-});
+// Initialize our canvas
+let stage = document.createElement("canvas");
+stage.width = innerWidth;
+stage.height = innerHeight;
+document.body.appendChild(stage);
+let ctx = stage.getContext("2d");
 
-// Create constructor function for individual particles
+let lastTime = 0;
 
-function Particle(x, y, directionX, directionY, size, color, layer) {
-	this.x = x;
-	this.y = y;
-	this.directionX = directionX;
-	this.directionY = directionY;
-	this.size = size;
-	this.color = color;
+// Collection of rain drops
+let drops = [];
 
-	// Method to draw individual particle
-	this.draw = function () {
-		const ctx = canvases[layer].getContext("2d");
+let initDrops = function () {
+	for (let i = 0; i < DROP_COUNT; i++) {
+		let drop = {};
+		resetDrop(drop);
+		drop.y = math.randomInteger(0, stage.height);
+		drops.push(drop);
+	}
+};
+
+// Reset a drop to the top of the canvas
+let resetDrop = function (drop) {
+	let scale = Math.random();
+	drop.x = math.randomInteger(-DROP_X_BUFFER, stage.width + DROP_X_BUFFER);
+	drop.vx = WIND_VELOCITY;
+	drop.vy = math.lerp(DROP_MIN_VELOCITY, DROP_MAX_VELOCITY, scale);
+	drop.l = math.lerp(DROP_MIN_LENGTH, DROP_MAX_LENGTH, scale);
+	drop.a = math.lerp(DROP_MIN_ALPHA, DROP_MAX_ALPHA, scale);
+	drop.y = math.randomInteger(-drop.l, 0);
+};
+
+let updateDrops = function (dt) {
+	for (let i = drops.length - 1; i >= 0; --i) {
+		let drop = drops[i];
+		drop.x += drop.vx * dt;
+		drop.y += drop.vy * dt;
+
+		if (drop.y > stage.height + drop.l) {
+			resetDrop(drop);
+		}
+	}
+};
+
+let renderDrops = function (ctx) {
+	ctx.save();
+	ctx.strokeStyle = DROP_COLOR;
+	ctx.lineWidth = DROP_WIDTH;
+	ctx.compositeOperation = "lighter";
+
+	for (let i = 0; i < drops.length; ++i) {
+		let drop = drops[i];
+
+		let x1 = Math.round(drop.x);
+		let y1 = Math.round(drop.y);
+
+		let v = { x: drop.vx, y: drop.vy };
+		math.normalizeVector(v);
+		math.scaleVector(v, -drop.l);
+
+		let x2 = Math.round(x1 + v.x);
+		let y2 = Math.round(y1 + v.y);
+
+		ctx.globalAlpha = drop.a;
 		ctx.beginPath();
-		ctx.moveTo(this.x, this.y);
-		ctx.lineTo(this.x + this.size, this.y - 10);
-		ctx.lineTo(this.x + this.size * 2, this.y);
-		ctx.arc(this.x + this.size, this.y, this.size, 0, Math.PI, false);
-		ctx.fillStyle = this.color;
-		ctx.fill();
-		ctx.stroke(); // Render the path
+		ctx.moveTo(x1, y1);
+		ctx.lineTo(x2, y2);
+		ctx.stroke();
 		ctx.closePath();
-	};
-
-	// Method to make particles fall like rain
-	this.update = function () {
-		if (this.y > canvases[layer].height) {
-			this.y = 0 - this.size;
-			this.x = Math.floor(
-				Math.random() * (innerWidth - size * 2 - size * 2) + size * 2
-			);
-			this.directionX = 20;
-			this.directionY = Math.floor(Math.random() * 0.4 - 0.2);
-		} else {
-			this.directionY += gravity;
-		}
-
-		this.x += this.directionX;
-		this.y += this.directionY;
-
-		this.draw();
-	};
-}
-
-// Render particles
-
-function init() {
-	let currentLayer = 0;
-	// When a layer is full, move to the next layer
-	for (let i = 0; i < particleLimit; i++) {
-		if (particleArray[currentLayer].length >= particleLimit / layerCount) {
-			currentLayer++;
-		}
-
-		//Particle
-		let size = Math.floor(Math.random() * (8 - 2) + 2);
-		let x = Math.floor(
-			Math.random() * (innerWidth - size * 2 - size * 2) + size * 2
-		);
-		let y = Math.floor(
-			Math.random() * (innerHeight - size * 2 - size * 2) + size * 2
-		);
-		let directionX = 20;
-		let directionY = Math.floor(Math.random() * 0.4 - 0.2);
-		//random color
-		let color = `white`;
-
-		particleArray[currentLayer].push(
-			new Particle(x, y, directionX, directionY, size, color, currentLayer)
-		);
 	}
-}
+	ctx.restore();
+};
 
-// Draw particles
+let render = function () {
+	ctx.fillStyle = "black";
+	ctx.fillRect(0, 0, stage.width, stage.height);
+	renderDrops(ctx);
+};
 
-function draw() {
-	for (let i = 0; i < particleArray.length; i++) {
-		const ctx = canvases[i].getContext("2d");
-		ctx.clearRect(0, 0, innerWidth, innerHeight);
-		console.log(ctx.clearRect(0, 0, innerWidth, innerHeight));
-		for (let j = 0; j < particleArray[i].length; j++) {
-			particleArray[i][j].update();
-		}
+let update = function (time) {
+	let dt = time - lastTime;
+	lastTime = time;
+	if (dt > 100) {
+		dt = FIXED_STEP;
 	}
-}
 
-function animate() {
-	requestAnimationFrame(animate);
-	draw();
-}
+	while (dt >= FIXED_STEP) {
+		updateDrops(FIXED_STEP);
+		dt -= FIXED_STEP;
+	}
 
-init();
-animate();
+	render();
+	requestAnimationFrame(update);
+};
+
+initDrops();
+requestAnimationFrame(update);
