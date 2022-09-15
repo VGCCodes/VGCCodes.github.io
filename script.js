@@ -114,14 +114,6 @@ let render = function () {
 	renderDrops(ctx);
 };
 
-let update = function (time) {
-	render();
-	requestAnimationFrame(update);
-};
-
-initDrops();
-requestAnimationFrame(update);
-
 const stop = false;
 const frameCount = 0;
 let fps, fpsInterval, startTime, now, then, elapsed;
