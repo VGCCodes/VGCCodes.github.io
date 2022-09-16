@@ -1,4 +1,4 @@
-const FIXED_STEP = 1;
+const FIXED_STEP = 16;
 
 // Wind
 const WIND_VELOCITY = 0.2; // Determines how slanted the rain drops fall, 0 = straight down
@@ -14,6 +14,10 @@ const DROP_MIN_LENGTH = 20;
 const DROP_MAX_LENGTH = 40;
 const DROP_MIN_ALPHA = 0.3;
 const DROP_MAX_ALPHA = 1;
+
+//Frame rate
+
+const fps = 60;
 
 // Math helpers
 let math = {
@@ -114,8 +118,6 @@ let render = function () {
 	renderDrops(ctx);
 };
 
-const fps = 60;
-initDrops();
 function animate(time) {
 	// perform some animation task here
 
@@ -135,4 +137,6 @@ function animate(time) {
 		requestAnimationFrame(animate);
 	}, 1000 / fps);
 }
+
+initDrops();
 animate();
