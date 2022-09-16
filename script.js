@@ -6,7 +6,7 @@ const WIND_VELOCITY = 0.2; // Determines how slanted the rain drops fall, 0 = st
 // Drop settings
 const DROP_COUNT = 500; // Adjust for more/less rain drops
 const DROP_WIDTH = 1; // Increase for thicker rain
-const DROP_X_BUFFER = 200; // How far to the sides of the screen drops will spawn
+const DROP_X_BUFFER = 500; // How far to the sides of the screen drops will spawn
 const DROP_COLOR = "lightblue";
 const DROP_MIN_VELOCITY = 0.6;
 const DROP_MAX_VELOCITY = 0.9;
