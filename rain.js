@@ -8,12 +8,15 @@ const DROP_COUNT = 500; // Adjust for more/less rain drops
 const DROP_WIDTH = 1; // Increase for thicker rain
 const DROP_X_BUFFER = 500; // How far to the sides of the screen drops will spawn
 const DROP_COLOR = "lightblue";
-const DROP_MIN_VELOCITY = 0.6;
-const DROP_MAX_VELOCITY = 0.9;
+const DROP_MIN_VELOCITY = 1;
+const DROP_MAX_VELOCITY = 2;
 const DROP_MIN_LENGTH = 20;
 const DROP_MAX_LENGTH = 40;
 const DROP_MIN_ALPHA = 0.3;
 const DROP_MAX_ALPHA = 1;
+
+// Collection of rain drops
+let drops = [];
 
 // Math helpers
 let math = {
@@ -42,8 +45,16 @@ stage.height = innerHeight;
 document.body.appendChild(stage);
 let ctx = stage.getContext("2d");
 
-// Collection of rain drops
-let drops = [];
+// Resize canvas and restart simulation
+
+window.addEventListener("resize", () => {
+	stage.width = innerWidth;
+	stage.height = innerHeight;
+	drops = [];
+	initDrops();
+	render();
+	requestAnimationFrame(update);
+});
 
 let initDrops = function () {
 	for (let i = 0; i < DROP_COUNT; i++) {
@@ -107,8 +118,7 @@ let renderDrops = function (ctx) {
 };
 
 let render = function () {
-	ctx.fillStyle = "black";
-	ctx.fillRect(0, 0, stage.width, stage.height);
+	ctx.clearRect(0, 0, stage.width, stage.height);
 	renderDrops(ctx);
 };
 
