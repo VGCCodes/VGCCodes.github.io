@@ -1,10 +1,10 @@
-const FIXED_STEP = 2;
+const FIXED_STEP = 16;
 
 // Wind
 const WIND_VELOCITY = 0.2; // Determines how slanted the rain drops fall, 0 = straight down
 
 // Drop settings
-const DROP_COUNT = 200; // Adjust for more/less rain drops
+const DROP_COUNT = 500; // Adjust for more/less rain drops
 const DROP_WIDTH = 1; // Increase for thicker rain
 const DROP_X_BUFFER = 200; // How far to the sides of the screen drops will spawn
 const DROP_COLOR = "lightblue";
@@ -119,14 +119,14 @@ let render = function () {
 };
 
 function FpsCtrl(fps, callback) {
-	var delay = 1000 / fps, // calc. time per frame
+	let delay = 1000 / fps, // calc. time per frame
 		time = null, // start time
 		frame = -1, // frame count
 		tref; // rAF time reference
 
 	function loop(timestamp) {
 		if (time === null) time = timestamp; // init start time
-		var seg = Math.floor((timestamp - time) / delay); // calc frame no.
+		let seg = Math.floor((timestamp - time) / delay); // calc frame no.
 		if (seg > frame) {
 			// moved to next frame?
 			frame = seg; // update
