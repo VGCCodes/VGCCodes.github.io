@@ -120,7 +120,7 @@ let loop = function (time) {
 	lastTime = time;
 	updateDrops(dt);
 	render();
-	requestAnimationFrame(loop(performance.now()));
+	requestAnimationFrame(loop(dt));
 };
 
 loop(performance.now());
