@@ -15,10 +15,6 @@ const DROP_MAX_LENGTH = 40;
 const DROP_MIN_ALPHA = 0.3;
 const DROP_MAX_ALPHA = 1;
 
-//Frame rate
-
-const fps = 60;
-
 // Math helpers
 let math = {
 	// Random integer between min and max
@@ -45,8 +41,6 @@ stage.width = innerWidth;
 stage.height = innerHeight;
 document.body.appendChild(stage);
 let ctx = stage.getContext("2d");
-
-let lastTime = 0;
 
 // Collection of rain drops
 let drops = [];
@@ -118,72 +112,17 @@ let render = function () {
 	renderDrops(ctx);
 };
 
-function FpsCtrl(fps, callback) {
-	let delay = 1000 / fps, // calc. time per frame
-		time = null, // start time
-		frame = -1, // frame count
-		tref; // rAF time reference
+let lastTime = 0;
 
-	function loop(timestamp) {
-		if (time === null) time = timestamp; // init start time
-		let seg = Math.floor((timestamp - time) / delay); // calc frame no.
-		if (seg > frame) {
-			// moved to next frame?
-			frame = seg; // update
-			callback({
-				// callback function
-				time: timestamp,
-				frame: frame,
-			});
-		}
-		tref = requestAnimationFrame(loop);
-	}
+let update = function (d) {
+	let dt = d - lastTime;
+	lastTime = d;
 
-	// play status
-	this.isPlaying = false;
-
-	// set frame-rate
-	this.frameRate = function (newfps) {
-		if (!arguments.length) return fps;
-		fps = newfps;
-		delay = 1000 / fps;
-		frame = -1;
-		time = null;
-	};
-
-	// enable starting/pausing of the object
-	this.start = function () {
-		if (!this.isPlaying) {
-			this.isPlaying = true;
-			tref = requestAnimationFrame(loop);
-		}
-	};
-
-	this.pause = function () {
-		if (this.isPlaying) {
-			cancelAnimationFrame(tref);
-			this.isPlaying = false;
-			time = null;
-			frame = -1;
-		}
-	};
-}
+	updateDrops(dt);
+	render();
+	requestAnimationFrame(update);
+};
 
 initDrops();
-
-const fpsCtrl = new FpsCtrl(fps, (data) => {
-	let dt = data.time - lastTime;
-	lastTime = data.time;
-	if (dt > 100) {
-		dt = FIXED_STEP;
-	}
-
-	while (dt >= FIXED_STEP) {
-		updateDrops(FIXED_STEP);
-		dt -= FIXED_STEP;
-	}
-
-	render();
-});
-
-fpsCtrl.start();
+render();
+requestAnimationFrame(update);
