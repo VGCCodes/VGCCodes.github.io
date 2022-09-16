@@ -1,10 +1,10 @@
-const FIXED_STEP = 16;
+const FIXED_STEP = 2;
 
 // Wind
 const WIND_VELOCITY = 0.2; // Determines how slanted the rain drops fall, 0 = straight down
 
 // Drop settings
-const DROP_COUNT = 500; // Adjust for more/less rain drops
+const DROP_COUNT = 200; // Adjust for more/less rain drops
 const DROP_WIDTH = 1; // Increase for thicker rain
 const DROP_X_BUFFER = 200; // How far to the sides of the screen drops will spawn
 const DROP_COLOR = "lightblue";
@@ -118,25 +118,72 @@ let render = function () {
 	renderDrops(ctx);
 };
 
-function animate(time) {
-	// perform some animation task here
+function FpsCtrl(fps, callback) {
+	var delay = 1000 / fps, // calc. time per frame
+		time = null, // start time
+		frame = -1, // frame count
+		tref; // rAF time reference
 
-	setTimeout(() => {
-		let dt = time - lastTime;
-		lastTime = time;
-		if (dt > 100) {
-			dt = FIXED_STEP;
+	function loop(timestamp) {
+		if (time === null) time = timestamp; // init start time
+		var seg = Math.floor((timestamp - time) / delay); // calc frame no.
+		if (seg > frame) {
+			// moved to next frame?
+			frame = seg; // update
+			callback({
+				// callback function
+				time: timestamp,
+				frame: frame,
+			});
 		}
+		tref = requestAnimationFrame(loop);
+	}
 
-		while (dt >= FIXED_STEP) {
-			updateDrops(FIXED_STEP);
-			dt -= FIXED_STEP;
+	// play status
+	this.isPlaying = false;
+
+	// set frame-rate
+	this.frameRate = function (newfps) {
+		if (!arguments.length) return fps;
+		fps = newfps;
+		delay = 1000 / fps;
+		frame = -1;
+		time = null;
+	};
+
+	// enable starting/pausing of the object
+	this.start = function () {
+		if (!this.isPlaying) {
+			this.isPlaying = true;
+			tref = requestAnimationFrame(loop);
 		}
+	};
 
-		render();
-		requestAnimationFrame(animate);
-	}, 1000 / fps);
+	this.pause = function () {
+		if (this.isPlaying) {
+			cancelAnimationFrame(tref);
+			this.isPlaying = false;
+			time = null;
+			frame = -1;
+		}
+	};
 }
 
 initDrops();
-animate();
+
+const fpsCtrl = new FpsCtrl(fps, (data) => {
+	let dt = data.time - lastTime;
+	lastTime = data.time;
+	if (dt > 100) {
+		dt = FIXED_STEP;
+	}
+
+	while (dt >= FIXED_STEP) {
+		updateDrops(FIXED_STEP);
+		dt -= FIXED_STEP;
+	}
+
+	render();
+});
+
+fpsCtrl.start();
