@@ -1,5 +1,3 @@
-const FIXED_STEP = 1;
-
 // Wind
 const WIND_VELOCITY = 0.2; // Determines how slanted the rain drops fall, 0 = straight down
 
@@ -41,8 +39,6 @@ stage.width = innerWidth;
 stage.height = innerHeight;
 document.body.appendChild(stage);
 let ctx = stage.getContext("2d");
-
-let lastTime = 0;
 
 // Collection of rain drops
 let drops = [];
@@ -114,50 +110,17 @@ let render = function () {
 	renderDrops(ctx);
 };
 
-const stop = false;
-const frameCount = 0;
-let fps, fpsInterval, startTime, now, then, elapsed;
-
-// initialize the timer variables and start the animation
-
-function startAnimating(fps) {
-	fpsInterval = 1000 / fps;
-	then = Date.now();
-	startTime = then;
-	animate();
-}
-
-function animate() {
-	// request another frame
-
-	requestAnimationFrame(animate);
-
-	// calc elapsed time since last loop
-
-	now = Date.now();
-	elapsed = now - then;
-
-	// if enough time has elapsed, draw the next frame
-
-	if (elapsed > fpsInterval) {
-		// Get ready for next frame by setting then=now, but also adjust for your
-		// specified fpsInterval not being a multiple of RAF's interval (16.7ms)
-		then = now - (elapsed % fpsInterval);
-
-		// Put your drawing code here
-		let dt = elapsed;
-		lastTime = now;
-		if (dt > 100) {
-			dt = FIXED_STEP;
-		}
-
-		while (dt >= FIXED_STEP) {
-			updateDrops(FIXED_STEP);
-			dt -= FIXED_STEP;
-		}
-	}
-}
-
 initDrops();
-render();
-startAnimating(60);
+
+// render at 60fps for all refresh rates and devices (60fps = 16.666ms)
+
+let lastTime = 0;
+let loop = function (time) {
+	let dt = time - lastTime;
+	lastTime = time;
+	updateDrops(dt);
+	render();
+	requestAnimationFrame(loop);
+};
+
+loop(performance.now());
