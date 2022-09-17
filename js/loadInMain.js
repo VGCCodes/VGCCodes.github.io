@@ -1,4 +1,4 @@
-function loadMain() {
+function loadMain(initialCrack) {
 	transition();
 
 	//play an animation of a bright white ball filling the page from the center
@@ -23,7 +23,7 @@ function loadMain() {
 				}
 				let i = ((canvas.height * t) / animationTime) * 2;
 				ctx.beginPath();
-				ctx.arc(canvas.width / 2, canvas.height / 2, i, 0, 2 * Math.PI);
+				ctx.arc(initialCrack.x, initialCrack.y, i, 0, 2 * Math.PI);
 				ctx.fill();
 				ctx.stroke();
 				if (t < animationTime) {

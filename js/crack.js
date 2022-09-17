@@ -6,30 +6,8 @@
 
 	const rainCanvas = document.getElementById("rain");
 
-	//function to fade out canvas slowly
-
-	function fadeOut(el) {
-		el.style.opacity = 1;
-		(function fade() {
-			if ((el.style.opacity -= 0.01) < 0.1) {
-				el.style.display = "none";
-				el.remove();
-				stage.remove();
-				loadMain();
-			} else {
-				requestAnimationFrame(fade);
-			}
-		})();
-	}
-
 	let locked = false;
-
-	//resize canvas
-
-	window.addEventListener("resize", () => {
-		stage.width = innerWidth;
-		stage.height = innerHeight;
-	});
+	let timeout = 200;
 
 	//get x and y pos
 
@@ -42,6 +20,30 @@
 		x: undefined,
 		y: undefined,
 	};
+
+	//function to fade out canvas slowly
+
+	function fadeOut(el) {
+		el.style.opacity = 1;
+		(function fade() {
+			if (timeout > 10) return requestAnimationFrame(fade);
+			if ((el.style.opacity -= 0.01) < 0.2) {
+				el.style.display = "none";
+				el.remove();
+				stage.remove();
+				loadMain(starting);
+			} else {
+				requestAnimationFrame(fade);
+			}
+		})();
+	}
+
+	//resize canvas
+
+	window.addEventListener("resize", () => {
+		stage.width = innerWidth;
+		stage.height = innerHeight;
+	});
 
 	window.addEventListener("mousemove", (event) => {
 		if (locked) return;
@@ -65,33 +67,38 @@
 	let lastTime = 0;
 
 	const update = (d) => {
-		let dt = d - lastTime;
-		lastTime = d;
+		if (!locked) return run();
+		setTimeout(run, timeout);
+		function run() {
+			timeout = 200 - cracks.length * 10;
+			let dt = d - lastTime;
+			lastTime = d;
 
-		let randomBool = Math.random() > 0.5 ? true : false;
+			let randomBool = Math.random() > 0.4 ? true : false;
 
-		// console.log(cracks);
-		// console.log(cracks[Math.floor(Math.random() * cracks.length)]);
+			// console.log(cracks);
+			// console.log(cracks[Math.floor(Math.random() * cracks.length)]);
 
-		let x =
-			randomBool && cracks.length
-				? cracks[Math.floor(Math.random() * cracks.length)].x /
-				  math.randomInteger(1, 2)
-				: starting.x;
-		let y =
-			randomBool && cracks.length
-				? cracks[Math.floor(Math.random() * cracks.length)].y
-				: starting.y;
+			let x =
+				randomBool && cracks.length
+					? cracks[Math.floor(Math.random() * cracks.length)].x /
+					  math.randomInteger(1, 2)
+					: starting.x;
+			let y =
+				randomBool && cracks.length
+					? cracks[Math.floor(Math.random() * cracks.length)].y
+					: starting.y;
 
-		crack(
-			x,
-			y,
-			math.randomInteger(0, stage.width / 0.5),
-			1,
-			"rgba(255,255,255,0.5)"
-		);
+			crack(
+				x,
+				y,
+				math.randomInteger(0, stage.width / 0.5),
+				1,
+				"rgba(255,255,255,0.5)"
+			);
 
-		requestAnimationFrame(update);
+			requestAnimationFrame(update);
+		}
 	};
 
 	let ctx = stage.getContext("2d");
