@@ -14,14 +14,14 @@ function loadMain() {
 		ctx.strokeStyle = "white";
 
 		let startTime = 0;
-		const animationTime = 0.5; // seconds
+		const animationTime = 0.8; // seconds
 		let fn = function (time) {
 			if (startTime) {
 				let t = (time - startTime) / 1000;
 				if (t > animationTime) {
 					t = animationTime;
 				}
-				let i = (canvas.height * t) / animationTime;
+				let i = ((canvas.height * t) / animationTime) * 2;
 				ctx.beginPath();
 				ctx.arc(canvas.width / 2, canvas.height / 2, i, 0, 2 * Math.PI);
 				ctx.fill();
