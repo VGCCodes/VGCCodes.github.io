@@ -64,6 +64,19 @@
 		requestAnimationFrame(update);
 	});
 
+	//ontouch for mobile
+
+	window.addEventListener("touchstart", (event) => {
+		if (!locked) {
+			mouse.x = event.touches[0].clientX;
+			mouse.y = event.touches[0].clientY;
+			starting.x = event.touches[0].clientX;
+			starting.y = event.touches[0].clientY;
+			fadeOut(rainCanvas);
+		}
+		requestAnimationFrame(update);
+	});
+
 	let lastTime = 0;
 
 	const update = (d) => {
