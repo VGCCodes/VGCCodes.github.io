@@ -38,6 +38,11 @@
 		y: undefined,
 	};
 
+	const starting = {
+		x: undefined,
+		y: undefined,
+	};
+
 	window.addEventListener("mousemove", (event) => {
 		if (locked) return;
 		mouse.x = event.x;
@@ -47,11 +52,14 @@
 	//onclick
 
 	window.addEventListener("click", (event) => {
+		if (!locked) {
+			mouse.x = event.x;
+			mouse.y = event.y;
+			starting.x = event.x;
+			starting.y = event.y;
+			fadeOut(rainCanvas);
+		}
 		requestAnimationFrame(update);
-		if (locked) return;
-		mouse.x = event.x;
-		mouse.y = event.y;
-		fadeOut(rainCanvas);
 	});
 
 	let lastTime = 0;
@@ -60,10 +68,25 @@
 		let dt = d - lastTime;
 		lastTime = d;
 
+		let randomBool = Math.random() > 0.5 ? true : false;
+
+		// console.log(cracks);
+		// console.log(cracks[Math.floor(Math.random() * cracks.length)]);
+
+		let x =
+			randomBool && cracks.length
+				? cracks[Math.floor(Math.random() * cracks.length)].x /
+				  math.randomInteger(1, 2)
+				: starting.x;
+		let y =
+			randomBool && cracks.length
+				? cracks[Math.floor(Math.random() * cracks.length)].y
+				: starting.y;
+
 		crack(
-			mouse.x,
-			mouse.y,
-			math.randomInteger(0, stage.width + stage.height),
+			x,
+			y,
+			math.randomInteger(0, stage.width / 0.5),
 			1,
 			"rgba(255,255,255,0.5)"
 		);
@@ -102,9 +125,6 @@
 		ctx.stroke();
 
 		ctx.closePath();
-
-		mouse.x = math.randomInteger(0, stage.width);
-		mouse.y = math.randomInteger(0, stage.height);
 
 		cracks.push({
 			x: x1,
