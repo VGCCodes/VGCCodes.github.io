@@ -9,7 +9,7 @@ uniform bool mouseDown;
 uniform sampler2D texture;
 
 vec2 rand2(vec2 x) {
-    return fract(sin(vec2(dot(x, vec2(13.9898, 8.141)), dot(x, vec2(3.4562, 17.398)))) * 43758.5453);
+    return fract(sin(vec2(dot(x, vec2(13.9898, 8.141)), dot(x, vec2(3.4562, 17.398)))) * 43758.5453 * ((1.0 + random) * 10.0));
 }
 
 vec4 voronoi(vec2 uv, vec2 size) {
