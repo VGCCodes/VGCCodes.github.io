@@ -91,17 +91,19 @@ function render() {
 
 const startTime = new Date().valueOf();
 window.onclick = () => {
+	if (!document.getElementById("rain")) return;
 	const loadedSeconds = (new Date().valueOf() - startTime) / 1000;
 	// if (loadedSeconds > 5)
 	requestAnimationFrame(render);
-	document.getElementById("rain").style.display = "none";
+	document.getElementById("rain").remove();
 };
 
 //ontouch for mobile
 
 window.addEventListener("touchstart", (event) => {
+	if (!document.getElementById("rain")) return;
 	const loadedSeconds = (new Date().valueOf() - startTime) / 1000;
 	// if (loadedSeconds > 5)
 	requestAnimationFrame(render);
-	document.getElementById("rain").style.display = "none";
+	document.getElementById("rain").remove();
 });

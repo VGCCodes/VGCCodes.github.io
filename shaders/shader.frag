@@ -8,8 +8,18 @@ uniform vec2 cursor;
 uniform bool mouseDown;
 uniform sampler2D texture;
 
+highp float rand(vec2 co) {
+    highp float a = 12.9898;
+    highp float b = 78.233;
+    highp float c = 43758.5453;
+    highp float dt = dot(co.xy, vec2(a, b));
+    highp float sn = mod(dt, 3.14);
+    return fract(sin(sn) * c);
+}
+
+
 vec2 rand2(vec2 x) {
-    return fract(sin(vec2(dot(x, vec2(13.9898, 8.141)), dot(x, vec2(3.4562, 17.398)))) * 43758.5453 * ((1.0 + random) * 10.0));
+    return vec2(rand(x), rand(x + vec2(1.0, 0.0)));
 }
 
 vec4 voronoi(vec2 uv, vec2 size) {
